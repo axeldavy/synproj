@@ -7,6 +7,7 @@ open Lexer
 open Parser
 open Parse_ast
 open Resolver
+open Prover
 
 let usage = "usage: "^Sys.argv.(0)^" [options] file.lus main"
 
