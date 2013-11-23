@@ -44,6 +44,7 @@ module Induction_solver = Smt.Make(struct end)
 let prove_induction k delta prop =
     let n = Term.make_app (declare_symbol "n" [] Type.type_int) [] in
     let n_mv = ref(n) in
+    Induction_solver.clear ();
     Induction_solver.assume ~id:0 (Formula.make_lit Formula.Le [Term.make_int (Num.Int 0); n]);
     for i=0 to (k-1) do 
 	Induction_solver.assume ~id:0 (delta !n_mv);
