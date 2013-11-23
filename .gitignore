@@ -1,0 +1,13 @@
+*.annot
+*.cmo
+*.cma
+*.cmi
+*.a
+*.o
+*.out
+*.cmx
+*.cmxs
+*.cmxa
+lmoch
+lib/
+_build/
