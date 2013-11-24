@@ -12,7 +12,19 @@ let x = Hstring.make name in (* creation d’un symbole *)
 Symbol.declare x t_in t_out; (* declaration de son type *)
 x
 
-  
+let fixed_Formula_Make_And l =
+   if tl(l) = []
+   then
+      hd(l)
+   else
+      Formula.make Formula.And l
+      
+let fixed_Formula_Make_Or l =
+   if tl(l) = []
+   then
+      hd(l)
+   else
+      Formula.make Formula.Or l 
 
 let define_prop eqs ok_ident = 
     (fun n ->  Formula.make_lit Formula.Eq [ Term.make_app ok_ident [n]; Term.t_true ] )
@@ -22,7 +34,7 @@ let define_delta eqs ok_ident =
         let apply_n =
             (fun eq -> eq n) in
         let l = List.map apply_n eqs in
-	    Formula.make Formula.And l
+	    fixed_Formula_Make_And l
      )
 
 module Base_solver = Smt.Make(struct end)
@@ -37,7 +49,7 @@ let prove_base k delta prop =
     for i=0 to k do
 	l := (prop (Term.make_int (Num.Int i)) )::!l;
     done;
-    Base_solver.entails ~id:0 (Formula.make Formula.And !l)
+    Base_solver.entails ~id:0 (fixed_Formula_Make_And !l)
 
 module Induction_solver = Smt.Make(struct end)
 
