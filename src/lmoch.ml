@@ -72,7 +72,7 @@ let () =
     if !type_only then exit 0;
     if main_node = "" then exit 0;
 
-    let res = Resolver.verify ft main_node in  
+    let res = Resolver.verify ft main_node !verbose in  
     match res with
       | TRUE -> Format.printf "TRUE PROPERTY";
       | FALSE -> Format.printf "FALSE PROPERTY";

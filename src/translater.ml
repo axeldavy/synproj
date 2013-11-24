@@ -146,6 +146,6 @@ let translate_node nd =
 
 let translate ft main =
   let ok_ident=ref "" in
-  List.iter (fun t -> if t.tn_name.name=main then (let ident,_=List.hd t.tn_input in ok_ident:=Ident.string_of ident); 
+  List.iter (fun t -> if t.tn_name.name=main then (let ident,_=List.hd t.tn_output in ok_ident:=Ident.string_of ident); 
     translate_node t) ft;
   !formulas, (Hstring.make !ok_ident)
