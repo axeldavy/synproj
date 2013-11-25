@@ -74,9 +74,9 @@ let () =
 
     let res = Resolver.verify ft main_node !verbose in  
     match res with
-      | TRUE -> Format.printf "TRUE PROPERTY";
-      | FALSE -> Format.printf "FALSE PROPERTY";
-      | UNKNOWN -> Format.printf "Don't know";
+      | TRUE -> Format.printf "\n\nTRUE PROPERTY\n";
+      | FALSE -> Format.printf "\n\nFALSE PROPERTY\n";
+      | UNKNOWN -> Format.printf "\n\nDon't know\n";
 
 
     exit 0
