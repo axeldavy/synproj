@@ -79,7 +79,7 @@ let prove_base k delta prop verbose =
 module Induction_solver = Smt.Make(struct end)
 
 let prove_induction k delta prop verbose=
-    let n = Term.make_app (declare_symbol "n" [] Type.type_int) [] in
+    let n = Term.make_app (Hstring.make "n") [] in
     let n_mv = ref(n) in
     Induction_solver.clear ();
     Induction_solver.assume ~id:0 (Formula.make_lit Formula.Le [Term.make_int (Num.Int 0); n]);
@@ -134,6 +134,7 @@ let prover eqs ok_ident verbose =
            else prover_k (k+1) delta prop
      in
      try
+        ignore(declare_symbol "n" [] Type.type_int);
         prover_k 0 delta prop
      with |Smt.Error(error) ->
        handle_error error;
