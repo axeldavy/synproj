@@ -16,6 +16,7 @@ let add_formula f =
 
 let declare_symbol name t_in t_out =
   let x = Hstring.make name in (* creation d'un symbole *)
+  print_string ("Declare "^name^"\n");
   Symbol.declare x t_in t_out; (* declaration de son type *)
   x
 
@@ -23,6 +24,9 @@ let symbol_of ident =
   Hstring.make (Ident.string_of ident)
 
 let num_aux = ref 0
+
+let nthcomp ident n =
+  Ident.string_of ident ^ "c_" ^ (string_of_int n)
 
 let declare_aux t_in t_out =
   incr num_aux;
@@ -147,12 +151,25 @@ let translate_equs eqs =
 						  texpr n ]))) eqs
 
 let translate_node nd =
-  let _ = List.map (fun (id,t) -> declare_symbol (Ident.string_of id) 
+  let input = List.map (fun (id,t) -> declare_symbol (Ident.string_of id) 
     [ Type.type_int ] (translate_type t)) nd.tn_input in
+  let app_input n = List.map (fun t -> Term.make_app t [n]) input in
   let _ = List.map (fun (id,t) -> declare_symbol (Ident.string_of id) 
     [ Type.type_int ] (translate_type t)) nd.tn_output in
   let _ = List.map (fun (id,t) -> declare_symbol (Ident.string_of id) 
     [ Type.type_int ] (translate_type t)) nd.tn_local in
+  let rec declare_node lst k =
+    match lst,k with
+      | [],_ -> ()
+      | [id,t],0 -> 
+	let smb=declare_symbol (Ident.string_of nd.tn_name) (List.map (fun (id,t) -> translate_type t) nd.tn_input) (translate_type t) in
+	add_formula (fun n -> Formula.make_lit Formula.Eq [Term.make_app smb (app_input n); Term.make_app (symbol_of id) [n]]); 
+      | (id,t)::q,k -> 
+	let smb=declare_symbol (nthcomp nd.tn_name k) (List.map (fun (id,t) -> translate_type t) nd.tn_input) (translate_type t) in
+	add_formula (fun n -> Formula.make_lit Formula.Eq [Term.make_app smb (app_input n); Term.make_app (symbol_of id) [n]]); 
+	declare_node q (k+1)
+  in
+  declare_node nd.tn_output 0;
   translate_equs nd.tn_equs
 
 let translate ft main =
