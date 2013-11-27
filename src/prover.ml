@@ -13,6 +13,16 @@ let x = Hstring.make name in (* creation d’un symbole *)
 Symbol.declare x t_in t_out; (* declaration de son type *)
 x
 
+let handle_error error =
+   Format.fprintf Format.std_formatter "erreur détectée dans le prouveur: ";
+   match (error) with
+   |DuplicateTypeName(ht) -> Format.fprintf Format.std_formatter "type déjà déclaré: ";
+   |DuplicateSymb(ht) -> Format.fprintf Format.std_formatter "Symbole dupliqué: ";
+   |UnknownType(ht) -> Format.fprintf Format.std_formatter "Type non déclaré: ";
+   |UnknownSymb(ht) -> Format.fprintf Format.std_formatter "Symbole non déclarée: ";
+   Hstring.print Format.str_formatter ht;
+   Format.fprintf Format.std_formatter "@;"
+
 let fixed_Formula_Make_And l =
    if tl(l) = []
    then
@@ -123,5 +133,9 @@ let prover eqs ok_ident verbose =
            else if induction then TRUE
            else prover_k (k+1) delta prop
      in
-     prover_k 0 delta prop
+     try
+        prover_k 0 delta prop
+     with |Smt.Error(error) ->
+       handle_error error;
+       UNKNOWN
 
