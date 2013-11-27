@@ -20,7 +20,7 @@ let handle_error error =
    |DuplicateSymb(ht) -> Format.fprintf Format.std_formatter "Symbole dupliqué: ";
    |UnknownType(ht) -> Format.fprintf Format.std_formatter "Type non déclaré: ";
    |UnknownSymb(ht) -> Format.fprintf Format.std_formatter "Symbole non déclarée: ";
-   Hstring.print Format.str_formatter ht;
+   Hstring.print Format.std_formatter ht;
    Format.fprintf Format.std_formatter "@;"
 
 let fixed_Formula_Make_And l =
