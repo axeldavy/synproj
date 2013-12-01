@@ -131,7 +131,12 @@ let prover eqs ok_ident verbose =
            let induction = prove_induction k delta prop verbose in
            if not base then FALSE
            else if induction then TRUE
-           else prover_k (k+1) delta prop
+           else begin 
+                if (verbose)
+                then
+		  Format.fprintf Format.std_formatter "\n";
+		prover_k (k+1) delta prop
+		end
      in
      try
         ignore(declare_symbol "n" [] Type.type_int);
