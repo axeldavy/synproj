@@ -16,14 +16,19 @@ x
 let handle_error error =
    Format.fprintf Format.std_formatter "erreur détectée dans le prouveur: ";
    match (error) with
-   |DuplicateTypeName(ht) -> Format.fprintf Format.std_formatter "type déjà déclaré: ";
-   |DuplicateSymb(ht) -> Format.fprintf Format.std_formatter "Symbole dupliqué: ";
-   |UnknownType(ht) -> Format.fprintf Format.std_formatter "Type non déclaré: ";
-   |UnknownSymb(ht) -> Format.fprintf Format.std_formatter "Symbole non déclarée: ";
+   |DuplicateTypeName(ht) -> 
+	Format.fprintf Format.std_formatter "type déjà déclaré: ";
+   |DuplicateSymb(ht) -> 
+	Format.fprintf Format.std_formatter "Symbole dupliqué: ";
+   |UnknownType(ht) -> 
+	Format.fprintf Format.std_formatter "Type non déclaré: ";
+   |UnknownSymb(ht) -> 
+	Format.fprintf Format.std_formatter "Symbole non déclarée: ";
    Hstring.print Format.std_formatter ht;
    Format.fprintf Format.std_formatter "@;"
 
-let fixed_Formula_Make_And l = (* Aez Formulat.And ne marche pas sur une liste de taille 1 *)
+let fixed_Formula_Make_And l = 
+(* Aez Formulat.And ne marche pas sur une liste de taille 1 *)
    if tl(l) = []
    then
       hd(l)
@@ -38,7 +43,8 @@ let fixed_Formula_Make_Or l =
       Formula.make Formula.Or l 
 
 let define_prop eqs ok_ident = (*prop: n-> (ok n == true) *)
-    (fun n ->  Formula.make_lit Formula.Eq [ Term.make_app ok_ident [n]; Term.t_true ] )
+    (fun n ->  
+      Formula.make_lit Formula.Eq [ Term.make_app ok_ident [n]; Term.t_true ] )
 
 let define_delta eqs ok_ident = (*delta: n-> les équations à n*)
     (fun n-> 
@@ -51,16 +57,19 @@ let define_delta eqs ok_ident = (*delta: n-> les équations à n*)
 module Base_solver = Smt.Make(struct end)
 
 let prove_base k delta prop verbose =
-    Base_solver.clear (); (* nécessite le patch d'Aez pour que ça marche correctement *)
+    (* nécessite le patch d'Aez pour que ça marche correctement *)
+    Base_solver.clear (); 
+    (*on suppose delta 0 ... delta k*)
     for i=0 to k do
         if (verbose)
         then
         begin
             Format.fprintf Format.std_formatter "base delta : " ;
-            Formula.print Format.std_formatter (delta (Term.make_int (Num.Int i)));
+            Formula.print Format.std_formatter
+		(delta (Term.make_int (Num.Int i)));
             Format.fprintf Format.std_formatter "@;";
 	end;
-        Base_solver.assume ~id:0 (delta (Term.make_int (Num.Int i))); (*on suppose delta 0 ... delta k*)
+        Base_solver.assume ~id:0 (delta (Term.make_int (Num.Int i))); 
     done;
     Base_solver.check();
     let l = ref([]) in
@@ -70,11 +79,13 @@ let prove_base k delta prop verbose =
         then
         begin
             Format.fprintf Format.std_formatter "base prop: " ;
-            Formula.print Format.std_formatter (prop (Term.make_int (Num.Int i)) );
+            Formula.print Format.std_formatter
+		  (prop (Term.make_int (Num.Int i)) );
             Format.fprintf Format.std_formatter "@;";
 	end;
     done;
-    Base_solver.entails ~id:0 (fixed_Formula_Make_And !l) (* teste si l'on a prop 0 ... prop k*)
+    (* teste si l'on a prop 0 ... prop k*)
+    Base_solver.entails ~id:0 (fixed_Formula_Make_And !l) 
 
 module Induction_solver = Smt.Make(struct end)
 
@@ -82,7 +93,8 @@ let prove_induction k delta prop verbose=
     let n = Term.make_app (Hstring.make "n") [] in
     let n_mv = ref(n) in
     Induction_solver.clear ();
-    Induction_solver.assume ~id:0 (Formula.make_lit Formula.Le [Term.make_int (Num.Int 0); n]);
+    Induction_solver.assume ~id:0 
+	(Formula.make_lit Formula.Le [Term.make_int (Num.Int 0); n]);
     for i=0 to (k-1) do 
         if (verbose)
         then
@@ -90,12 +102,14 @@ let prove_induction k delta prop verbose=
             Format.fprintf Format.std_formatter "induction delta : " ;
             Formula.print Format.std_formatter (delta !n_mv);
             Format.fprintf Format.std_formatter "@;";
-            Format.fprintf Format.std_formatter "induction prop hypothesis : " ;
+            Format.fprintf Format.std_formatter "induction prop hypothesis : ";
             Formula.print Format.std_formatter (prop !n_mv);
             Format.fprintf Format.std_formatter "@;";
 	end;
-	Induction_solver.assume ~id:0 (delta !n_mv);  (*on suppose delta n ... delta n+k-1*)
-	Induction_solver.assume ~id:0 (prop !n_mv); (*on suppose prop n ... prop n+k-1*)
+	(*on suppose delta n ... delta n+k-1*)
+	Induction_solver.assume ~id:0 (delta !n_mv); 
+	(*on suppose prop n ... prop n+k-1*)
+	Induction_solver.assume ~id:0 (prop !n_mv); 
 	n_mv:= Term.make_arith Term.Plus !n_mv (Term.make_int (Num.Int 1));
     done;
     if (verbose)
