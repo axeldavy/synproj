@@ -38,10 +38,8 @@ L'approche initiale a été simple : on traite chaque node successivement, on trad
 Cette approche un peu naïve ne fonctionnait en réalité que pour le cas d'un node, sans appel à d'autres nodes. En réalité, comme il faut des variables différentes pour chaque appel de node, il a fallu traiter les nodes dans l'ordre des appels, le nombre de fois qu'ils sont appelés (en commençant par le node principal).
 
 \section{Preuve}
-% TODO
+L'implémentation essaye de prouver le programme par une k-induction, pour k de plus en plus grand. Il s'arrête à k=20.
 
-\subsections{Optimisations}
-Nous n'avons pas réalisé d'optimisations à la k-induction. 
-
+Nous n'avons pas réalisé d'optimisations particulière à cette partie pour l'instant. 
 Certains optimisations importantes, comme décrites dans les articles, sont impossible du fait que Aez ne retourne pas de contre-exemples lorsqu'une formule est fausse.
 \end{document}
