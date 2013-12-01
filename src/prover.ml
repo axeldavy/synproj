@@ -23,7 +23,7 @@ let handle_error error =
    Hstring.print Format.std_formatter ht;
    Format.fprintf Format.std_formatter "@;"
 
-let fixed_Formula_Make_And l =
+let fixed_Formula_Make_And l = (* Aez Formulat.And ne marche pas sur une liste de taille 1 *)
    if tl(l) = []
    then
       hd(l)
@@ -37,10 +37,10 @@ let fixed_Formula_Make_Or l =
    else
       Formula.make Formula.Or l 
 
-let define_prop eqs ok_ident = 
+let define_prop eqs ok_ident = (*prop: n-> (ok n == true) *)
     (fun n ->  Formula.make_lit Formula.Eq [ Term.make_app ok_ident [n]; Term.t_true ] )
 
-let define_delta eqs ok_ident =
+let define_delta eqs ok_ident = (*delta: n-> les équations à n*)
     (fun n-> 
         let apply_n =
             (fun eq -> eq n) in
@@ -51,7 +51,7 @@ let define_delta eqs ok_ident =
 module Base_solver = Smt.Make(struct end)
 
 let prove_base k delta prop verbose =
-    Base_solver.clear ();
+    Base_solver.clear (); (* nécessite le patch d'Aez pour que ça marche correctement *)
     for i=0 to k do
         if (verbose)
         then
@@ -60,12 +60,12 @@ let prove_base k delta prop verbose =
             Formula.print Format.std_formatter (delta (Term.make_int (Num.Int i)));
             Format.fprintf Format.std_formatter "@;";
 	end;
-        Base_solver.assume ~id:0 (delta (Term.make_int (Num.Int i)));
+        Base_solver.assume ~id:0 (delta (Term.make_int (Num.Int i))); (*on suppose delta 0 ... delta k*)
     done;
     Base_solver.check();
     let l = ref([]) in
     for i=0 to k do
-	l := (prop (Term.make_int (Num.Int i)) )::!l;
+	l := (prop (Term.make_int (Num.Int i)) )::!l; 
 	if (verbose)
         then
         begin
@@ -74,7 +74,7 @@ let prove_base k delta prop verbose =
             Format.fprintf Format.std_formatter "@;";
 	end;
     done;
-    Base_solver.entails ~id:0 (fixed_Formula_Make_And !l)
+    Base_solver.entails ~id:0 (fixed_Formula_Make_And !l) (* teste si l'on a prop 0 ... prop k*)
 
 module Induction_solver = Smt.Make(struct end)
 
@@ -94,8 +94,8 @@ let prove_induction k delta prop verbose=
             Formula.print Format.std_formatter (prop !n_mv);
             Format.fprintf Format.std_formatter "@;";
 	end;
-	Induction_solver.assume ~id:0 (delta !n_mv);
-	Induction_solver.assume ~id:0 (prop !n_mv);
+	Induction_solver.assume ~id:0 (delta !n_mv);  (*on suppose delta n ... delta n+k-1*)
+	Induction_solver.assume ~id:0 (prop !n_mv); (*on suppose prop n ... prop n+k-1*)
 	n_mv:= Term.make_arith Term.Plus !n_mv (Term.make_int (Num.Int 1));
     done;
     if (verbose)
@@ -105,7 +105,7 @@ let prove_induction k delta prop verbose=
         Formula.print Format.std_formatter (delta !n_mv);
         Format.fprintf Format.std_formatter "@;";
     end;
-    Induction_solver.assume ~id:0 (delta !n_mv);
+    Induction_solver.assume ~id:0 (delta !n_mv); (*on suppose delta n+k *)
     Induction_solver.check();
     if (verbose)
     then
@@ -114,14 +114,14 @@ let prove_induction k delta prop verbose=
         Formula.print Format.std_formatter (prop !n_mv);
         Format.fprintf Format.std_formatter "@;";
     end;
-    Induction_solver.entails ~id:0 (prop !n_mv)
+    Induction_solver.entails ~id:0 (prop !n_mv) (* teste si l'on a prop n+k*)
 
 
 
 let prover eqs ok_ident verbose =
     let delta = define_delta eqs ok_ident in
     let prop = define_prop eqs ok_ident in
-    let k_max = 20 in 
+    let k_max = 20 in (* la limite 20 est arbitraire *)
     let rec prover_k k delta prop =
        if (k > k_max)
        then
