@@ -15,13 +15,14 @@
 
 \section{Fonctionnalités}
 
-Notre Model Checker Lustre supporte
+Notre Model Checker Lustre utilise la k-induction pour prouver les programmes. Il supporte:
 \begin{itemize}
 \item Les nodes
 \item Les flottants (mais pas \verb!int_of_float! et \verb!float_of_int!)
 \item Les tuples
+\item Avec le more verbose, les formules utilisées pour l'induction sont affichées.
 \end{itemize}
-Il utilise la k-induction pour prouver les programmes.
+
 
 \section{Choix d'implémentation et difficultés rencontrées}
 \subsection{Organisation du code}
@@ -30,7 +31,7 @@ Le code à écrire a été séparé en deux étapes principales :
 \item La ``traduction'' (\verb!translater.ml!), qui se charge de parcourir l'arbre de syntaxe abstraite, et de générer les formules Alt-ergo-zero associées au programme ;
 \item La ``preuve'' (\verb!prover.ml!), qui utilise l'interface d'alt-ergo-zero pour essayer de démontrer ce qu'il faut démontrer. C'est dans cette étape que l'on entre les hypothèses, et que l'on réalise la k-induction.
 \end{itemize}
-Le tout est 
+
 
 \section{Traduction}
 L'approche initiale a été simple : on traite chaque node successivement, on traduit les expressions récursivement en générant (par effet de bord) les formules nécessaires, en créant des variables auxiliaires si nécessaires.
