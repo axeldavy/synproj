@@ -7,16 +7,25 @@
 
 \author{Robin Champenois et Axel Davy}
 
-\title{Petite prÃ©sentation de notre Model Checker}
+\title{Petite présentation de notre Model Checker}
 
 \begin{document}
 
 \maketitle
 
-\section{fonctionnalitÃ©s}
+\section{fonctionnalités}
+
+Notre Model Checker Lustre supporte
 \begin{itemize}
-
+\item Les nodes
+\item Les flottants (mais pas \verb!int_of_float! et \verb!float_of_int!)
+\item les tuples
 \end{itemize}
-\section{DifficultÃ©s rencontrÃ©es}
+Il utilise la k induction pour prouver les programmes.
 
+
+\section{Difficultés rencontrées et choix d'implémentation}
+\begin{itemize}
+\item Nous n'avons pas réalisé d'optimisations à la k-induction. Certains optimisations importantes, comme décrites dans les articles, sont impossible du fait que Aez ne retourne pas de contre-exemples lorsqu'une formule est fausse.
+\end{itemize}
 \end{document}

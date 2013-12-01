@@ -121,7 +121,7 @@ let prove_induction k delta prop verbose=
 let prover eqs ok_ident verbose =
     let delta = define_delta eqs ok_ident in
     let prop = define_prop eqs ok_ident in
-    let k_max = 10 in 
+    let k_max = 20 in 
     let rec prover_k k delta prop =
        if (k > k_max)
        then
