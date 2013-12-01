@@ -102,6 +102,18 @@ let declare_node nd ncall =
   declare_output nd.tn_output 0; USELESS*)
   app_input,app_output
 
+let rec encodage_flottant f =
+(* codage de flottant = (puissance de 2)*mantisse de longueur bornée*)
+(* on va convertir en Num.Ratio ou Num.Int*)
+  if f < 0.
+    then
+    Num.minus_num (encodage_flottant (-. f))
+  else if floor f = f (* inclut f = 0*)
+    then
+    Num.Int (int_of_float f)
+  else
+    Num.quo_num (encodage_flottant (2. *. f)) (Num.Int 2) (* nombre d'appel borné car mantisse bornée*)
+    
 let single l =
   match l with
   | [e] -> e;
@@ -114,7 +126,7 @@ let translate_exprs e ncall =
       | TE_const(Cbool(true)) -> [nfun Term.t_true]
       | TE_const(Cbool(false)) -> [nfun Term.t_false]
       | TE_const(Cint(n)) -> [nfun (Term.make_int (Num.Int n))]
-      | TE_const(Creal(f)) -> assert false;
+      | TE_const(Creal(f)) -> [nfun (Term.make_int (encodage_flottant f))];
 
       | TE_ident(i) -> [(fun n -> Term.make_app (symbol_of i ncall) [n])]
 
