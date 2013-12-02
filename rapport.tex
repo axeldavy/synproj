@@ -4,6 +4,8 @@
 \usepackage[francais]{babel}
 \usepackage{verbatim}
 \usepackage{hyperref} 
+\usepackage{geometry}
+\geometry{hmargin=2cm,vmargin=2.5cm}
 
 \author{Robin Champenois et Axel Davy}
 
@@ -33,12 +35,14 @@ Le code à écrire a été séparé en deux étapes principales :
 \end{itemize}
 
 
-\section{Traduction}
+\subsection{Traduction}
 L'approche initiale a été simple : on traite chaque node successivement, on traduit les expressions récursivement en générant (par effet de bord) les formules nécessaires, en créant des variables auxiliaires si nécessaires.
 
-Cette approche un peu naïve ne fonctionnait en réalité que pour le cas d'un node, sans appel à d'autres nodes. En réalité, comme il faut des variables différentes pour chaque appel de node, il a fallu traiter les nodes dans l'ordre des appels, le nombre de fois qu'ils sont appelés (en commençant par le node principal).
+Cette approche un peu naïve ne fonctionnait en réalité que pour le cas d'un node, sans appel à d'autres nodes. Comme il faut des variables différentes pour chaque appel de node, il a fallu traiter les nodes dans l'ordre des appels, le nombre de fois qu'ils sont appelés (en commençant par le node principal).
 
-\section{Preuve}
+Ce traitement termine car le nombre d'appels est borné (pas d'appels récursifs).
+
+\subsection{Preuve}
 L'implémentation essaye de prouver le programme par une k-induction, pour k de plus en plus grand. Il s'arrête à k=20.
 
 Nous n'avons pas réalisé d'optimisations particulière à cette partie pour l'instant. 

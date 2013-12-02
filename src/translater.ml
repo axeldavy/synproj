@@ -4,7 +4,14 @@ open Asttypes
 open Typed_ast
 open Ident
 open Format
+open Asttypes
+open Lexing
 
+let report_loc (b,e) =
+  let l = b.pos_lnum in
+  let fc = b.pos_cnum - b.pos_bol + 1 in
+  let lc = e.pos_cnum - b.pos_bol + 1 in
+  eprintf "line %d, characters %d-%d:\n" l fc lc
 
 (* Pour retrouver facilement les nodes, les traiter dans l'ordre des appels,
    et différencier les noms de variables de chaque appel *)
@@ -146,7 +153,8 @@ let translate_exprs e ncall =
 		| Op_ge -> Op_le, te2, te1
 		| o -> o, te1, te2
 	      in
-	      let [t1], [t2] = translate_expr e1, translate_expr e2 in 
+	      let t1, t2 = single (translate_expr e1), 
+		single (translate_expr e2) in 
 	      (* t1 et t2 ne peuvent pas être des tuples *)
 	      fun n -> (Formula.make_lit (translate_cmp_op top) [t1 n;t2 n])
 		
@@ -168,9 +176,21 @@ let translate_exprs e ncall =
 	  
       | TE_op(Op_add | Op_sub | Op_mul | Op_div | Op_mod
 		 | Op_add_f | Op_sub_f | Op_mul_f | Op_div_f as ope, [e1;e2]) ->
-	let [t1], [t2] =translate_expr e1, translate_expr e2 in 
+	let t1, t2 = single (translate_expr e1), single (translate_expr e2) in 
 	(* e1 et e2 n'ont pas le droit d'être des tuples *)
 	[(fun n -> Term.make_arith (translate_arith_op ope) (t1 n) (t2 n))]
+
+      | TE_op(Op_add | Op_sub as ope, [e1]) ->
+	let t1 = single (translate_expr e1) in 
+	(* e1 n'a pas le droit d'être un tuple *)
+	[(fun n -> Term.make_arith (translate_arith_op ope) 
+	  (Term.make_int (Num.Int(0))) (t1 n))]
+
+      | TE_op(Op_add_f | Op_sub_f as ope, [e1]) ->
+	let t1 = single (translate_expr e1) in 
+	(* e1 n'a pas le droit d'être un tuple *)
+	[(fun n -> Term.make_arith (translate_arith_op ope) 
+	  (Term.make_real (Num.Int(0))) (t1 n))]
 
       | TE_op(Op_if, [e1; e2; e3]) ->
 	let t1=single (translate_expr e1) in
@@ -181,7 +201,8 @@ let translate_exprs e ncall =
 								Term.t_true]) 
 	    (e2' n) (e3' n))) t2 t3
 
-      | TE_op(_,_) -> assert false (* Cas impossible syntaxiquement *)
+      | TE_op(_,_) -> report_loc e.texpr_loc;
+	assert false (* Cas impossible syntaxiquement *)
 
       | TE_app(ident,lst) -> 
 	( match ident.kind with
@@ -200,10 +221,10 @@ let translate_exprs e ncall =
 	      ndin tlst;
 	    ndout
 
-	  | _ -> assert false
+	  | _ -> report_loc e.texpr_loc; assert false
 	)
 	  
-      | TE_prim(ident,lst) -> assert false 
+      | TE_prim(ident,lst) -> report_loc e.texpr_loc; assert false 
       (* Comment traiter int_of_float et float_of_int ? *)
 
       | TE_arrow(e1,e2) -> 
